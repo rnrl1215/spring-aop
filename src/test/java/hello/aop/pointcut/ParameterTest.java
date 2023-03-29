@@ -1,7 +1,10 @@
 package hello.aop.pointcut;
 
 import hello.aop.member.MemberService;
+import hello.aop.member.annotation.ClassAop;
+import hello.aop.member.annotation.MethodAop;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -50,6 +53,37 @@ public class ParameterTest {
         @Before("allMember() && args(arg,..)")
         public void logArgs3(String arg) {
             log.info("[logArgs3] arg={}", arg);
+        }
+
+
+        // 스프링 컨테이너에 들어 있는것을 인정
+       @Before("allMember() && this(obj)")
+        public void thisArgs(JoinPoint joinPoint, MemberService obj) {
+            log.info("[this]{}, obj={}", joinPoint.getSignature(), obj.getClass());
+        }
+
+
+        // 프록시 객체
+        // target은 프록시 실제 대상을 가져온다.
+        @Before("allMember() && target(obj)")
+        public void targetArgs(JoinPoint joinPoint, MemberService obj) {
+            log.info("[target]{}, obj={}", joinPoint.getSignature(), obj.getClass());
+        }
+
+        @Before("allMember() && @target(annotation)")
+        public void targetArgs(JoinPoint joinPoint, ClassAop annotation) {
+            log.info("[@target]{}, obj={}", joinPoint.getSignature(), annotation);
+        }
+
+
+        @Before("allMember() && @target(annotation)")
+        public void atWithin(JoinPoint joinPoint, ClassAop annotation) {
+            log.info("[@within]{}, obj={}", joinPoint.getSignature(), annotation);
+        }
+
+        @Before("allMember() && @annotation(annotation)")
+        public void atAnnotation(JoinPoint joinPoint, MethodAop annotation) {
+            log.info("[@annotation]{}, obj={}", joinPoint.getSignature(), annotation);
         }
     }
 }
